@@ -53,7 +53,7 @@ class OSCQueryNode:
         full_path: str,
         contents: list["OSCQueryNode"] = None,
         access: OSCAccess = OSCAccess.NO_VALUE,
-        description=None,
+        description: str = None,
         value: Union[T, List[T]] = None,
     ):
         self.full_path = full_path
@@ -75,6 +75,45 @@ class OSCQueryNode:
         self.access = access
 
         self.description = description
+
+    @classmethod
+    def from_json(cls, json) -> "OSCQueryNode":
+        contents = None
+        if "CONTENTS" in json:
+            sub_nodes = []
+            for subNode in json["CONTENTS"]:
+                sub_nodes.append(OSCQueryNode.from_json(json["CONTENTS"][subNode]))
+            contents = sub_nodes
+
+        # This *should* be required but some implementations don't have it...
+        full_path = None
+        if "FULL_PATH" in json:
+            full_path = json["FULL_PATH"]
+
+        description = None
+        if "DESCRIPTION" in json:
+            description = json["DESCRIPTION"]
+
+        access = None
+        if "ACCESS" in json:
+            access = OSCAccess(json["ACCESS"])
+
+        value = None
+        if "VALUE" in json:
+            value = []
+            if not isinstance(json["VALUE"], list):
+                raise Exception("OSCQuery JSON Value is not List / Array? Out-of-spec?")
+
+            for idx, v in enumerate(json["VALUE"]):
+                # According to the spec, if there is not yet a value, the return will be an empty JSON object
+                if isinstance(v, dict) and not v:
+                    # FIXME does this apply to all values in the value array always...? I assume it does here
+                    value = []
+                    break
+                else:
+                    value.append(v)
+
+        return cls(full_path, contents, access, description, value)
 
     @property
     def type_(self) -> list[T]:
@@ -118,7 +157,7 @@ class OSCQueryNode:
 
         parent.contents.append(child)
 
-    def to_json(self):
+    def to_json(self) -> str:
         return json.dumps(self, cls=OSCNodeEncoder)
 
     def __iter__(self):

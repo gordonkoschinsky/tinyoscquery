@@ -3,13 +3,10 @@ import time
 import requests
 from zeroconf import ServiceBrowser, ServiceInfo, ServiceListener, Zeroconf
 
+from tinyoscquery.queryservice import OSCQueryService
 from tinyoscquery.shared.host_info import OSCHostInfo
+from tinyoscquery.shared.node import OSCQueryNode
 from tinyoscquery.shared.osc_access import OSCAccess
-
-from .shared.node import (
-    OSCQueryNode,
-    osc_type_string_to_python_type,
-)
 
 
 class OSCQueryListener(ServiceListener):
@@ -95,7 +92,7 @@ class OSCQueryClient(object):
         ip_str = ".".join([str(int(num)) for num in self.service_info.addresses[0]])
         return ip_str
 
-    def query_node(self, node="/"):
+    def query_node(self, node: str = "/"):
         url = self._get_query_root() + node
         r = None
         try:
@@ -113,9 +110,9 @@ class OSCQueryClient(object):
 
         self.last_json = r.json()
 
-        return self._make_node_from_json(self.last_json)
+        return OSCQueryNode.from_json(self.last_json)
 
-    def get_host_info(self):
+    def get_host_info(self) -> OSCHostInfo | None:
         url = self._get_query_root() + "/HOST_INFO"
         r = None
         try:
@@ -148,49 +145,21 @@ class OSCQueryClient(object):
 
         return hi
 
-    def _make_node_from_json(self, json):
-        new_node = OSCQueryNode()
-
-        if "CONTENTS" in json:
-            sub_nodes = []
-            for subNode in json["CONTENTS"]:
-                sub_nodes.append(self._make_node_from_json(json["CONTENTS"][subNode]))
-            new_node.contents = sub_nodes
-
-        # This *should* be required but some implementations don't have it...
-        if "FULL_PATH" in json:
-            new_node.full_path = json["FULL_PATH"]
-
-        if "TYPE" in json:
-            new_node.type_ = osc_type_string_to_python_type(json["TYPE"])
-
-        if "DESCRIPTION" in json:
-            new_node.description = json["DESCRIPTION"]
-
-        if "ACCESS" in json:
-            new_node.access = OSCAccess(json["ACCESS"])
-
-        if "VALUE" in json:
-            new_node.value = []
-            # This should always be an array... throw an exception here?
-            if not isinstance(json["VALUE"], list):
-                raise Exception("OSCQuery JSON Value is not List / Array? Out-of-spec?")
-
-            for idx, v in enumerate(json["VALUE"]):
-                # According to the spec, if there is not yet a value, the return will be an empty JSON object
-                if isinstance(v, dict) and not v:
-                    # FIXME does this apply to all values in the value array always...? I assume it does here
-                    new_node.value = []
-                    break
-                else:
-                    new_node.value.append(new_node.type_[idx](v))
-
-        return new_node
-
 
 if __name__ == "__main__":
+    # Start server
+    oscqs = OSCQueryService("Test-Service", 9020, 9020)
+    print(oscqs.root_node)
+
+    oscqs.add_node(
+        OSCQueryNode("/testing/is/cool", value=99, access=OSCAccess.READONLY_VALUE)
+    )
+    time.sleep(2)  # Wait for server being up
+
+    # Start browser
     browser = OSCQueryBrowser()
     time.sleep(2)  # Wait for discovery
+    print("Browser is up.")
 
     for service_info in browser.get_discovered_oscquery():
         client = OSCQueryClient(service_info)
@@ -202,5 +171,10 @@ if __name__ == "__main__":
         )
 
         # Query a node and print its value
-        node = client.query_node("/test/node")
-        print(f"Node is a {node.type_} with value {node.value}")
+        node = client.query_node("/testing/is/cool")
+        if node:
+            print(
+                f"Node {node.full_path} with description {node.description} (value {node.value} of type {node.type_})"
+            )
+        else:
+            print("Node not found")
