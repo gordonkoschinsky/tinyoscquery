@@ -20,7 +20,7 @@ disallowed_path_chars = (
 
 class OSCNodeEncoder(JSONEncoder):
     def default(self, o):
-        if isinstance(o, OSCQueryNode):
+        if isinstance(o, OSCPathNode):
             obj_dict = {}
             for k, v in vars(o).items():
                 if v is None:
@@ -59,11 +59,11 @@ class OSCNodeEncoder(JSONEncoder):
 T = TypeVar("T", bound=int | float | bool | str)
 
 
-class OSCQueryNode:
+class OSCPathNode:
     def __init__(
         self,
         full_path: str,
-        contents: list["OSCQueryNode"] = None,
+        contents: list["OSCPathNode"] = None,
         access: OSCAccess = OSCAccess.NO_VALUE,
         description: str = None,
         value: Union[T, List[T]] = None,
@@ -77,7 +77,7 @@ class OSCQueryNode:
 
         self.full_path = full_path
 
-        self.contents: list["OSCQueryNode"] = contents or []
+        self.contents: list["OSCPathNode"] = contents or []
 
         # Ensure that value is an iterable
         try:
@@ -96,12 +96,12 @@ class OSCQueryNode:
         self.description = description
 
     @classmethod
-    def from_json(cls, json) -> "OSCQueryNode":
+    def from_json(cls, json) -> "OSCPathNode":
         contents = None
         if "CONTENTS" in json:
             sub_nodes = []
             for subNode in json["CONTENTS"]:
-                sub_nodes.append(OSCQueryNode.from_json(json["CONTENTS"][subNode]))
+                sub_nodes.append(OSCPathNode.from_json(json["CONTENTS"][subNode]))
             contents = sub_nodes
 
         # This *should* be required but some implementations don't have it...
@@ -141,7 +141,7 @@ class OSCQueryNode:
             types.append(type(v))
         return types
 
-    def find_subnode(self, full_path: str) -> Union["OSCQueryNode", None]:
+    def find_subnode(self, full_path: str) -> Union["OSCPathNode", None]:
         if self.full_path == full_path:
             return self
 
@@ -155,7 +155,7 @@ class OSCQueryNode:
 
         return None
 
-    def add_child_node(self, child: "OSCQueryNode"):
+    def add_child_node(self, child: "OSCPathNode"):
         if child == self:
             return
 
@@ -171,7 +171,7 @@ class OSCQueryNode:
         parent = self.find_subnode(parent_path)
 
         if parent is None:
-            parent = OSCQueryNode(parent_path)
+            parent = OSCPathNode(parent_path)
             self.add_child_node(parent)
 
         parent.contents.append(child)
@@ -238,11 +238,11 @@ def python_type_list_to_osc_type(types_: list[type]) -> str:
 
 
 if __name__ == "__main__":
-    root = OSCQueryNode("/", description="root node")
-    root.add_child_node(OSCQueryNode("/test/node/one"))
-    root.add_child_node(OSCQueryNode("/test/node/two"))
-    root.add_child_node(OSCQueryNode("/test/othernode/one"))
-    root.add_child_node(OSCQueryNode("/test/othernode/three"))
+    root = OSCPathNode("/", description="root node")
+    root.add_child_node(OSCPathNode("/test/node/one"))
+    root.add_child_node(OSCPathNode("/test/node/two"))
+    root.add_child_node(OSCPathNode("/test/othernode/one"))
+    root.add_child_node(OSCPathNode("/test/othernode/three"))
 
     # print(root)
 

@@ -2,7 +2,7 @@ from zeroconf import ServiceBrowser, ServiceInfo, ServiceListener, Zeroconf
 
 from tinyoscquery.osc_query_client import OSCQueryClient
 from tinyoscquery.shared.host_info import OSCHostInfo
-from tinyoscquery.shared.node import OSCQueryNode
+from tinyoscquery.shared.osc_path_node import OSCPathNode
 
 
 class OSCQueryBrowser(object):
@@ -29,7 +29,7 @@ class OSCQueryBrowser(object):
 
     def find_nodes_by_endpoint_address(
         self, address
-    ) -> list[tuple[ServiceInfo, OSCHostInfo, OSCQueryNode]]:
+    ) -> list[tuple[ServiceInfo, OSCHostInfo, OSCPathNode]]:
         svcs = []
         for svc in self.get_discovered_oscquery():
             client = OSCQueryClient(svc)

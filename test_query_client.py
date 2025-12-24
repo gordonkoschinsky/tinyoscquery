@@ -3,18 +3,18 @@ import time
 from tinyoscquery.osc_query_browser import OSCQueryBrowser
 from tinyoscquery.osc_query_client import OSCQueryClient
 from tinyoscquery.osc_query_service import OSCQueryService
-from tinyoscquery.shared.node import OSCQueryNode
 from tinyoscquery.shared.osc_access import OSCAccess
+from tinyoscquery.shared.osc_path_node import OSCPathNode
 
 if __name__ == "__main__":
     # Start server
-    oscqs = OSCQueryService("Test-Service", 9020, 9020)
+    oscqs = OSCQueryService("Test-Service", 9020, 9020, osc_ip="127.1.1.1")
     print(oscqs.root_node)
 
     oscqs.add_node(
-        OSCQueryNode("/testing/is/cool", value=99, access=OSCAccess.READONLY_VALUE)
+        OSCPathNode("/testing/is/cool", value=99, access=OSCAccess.READONLY_VALUE)
     )
-    time.sleep(2)  # Wait for server being up
+    time.sleep(1)  # Wait for server being up
 
     # Start browser
     browser = OSCQueryBrowser()

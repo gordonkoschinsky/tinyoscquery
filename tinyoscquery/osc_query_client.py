@@ -2,7 +2,7 @@ import requests
 from zeroconf import ServiceInfo
 
 from tinyoscquery.shared.host_info import OSCHostInfo
-from tinyoscquery.shared.node import OSCQueryNode
+from tinyoscquery.shared.osc_path_node import OSCPathNode
 
 
 class OSCQueryClient(object):
@@ -23,7 +23,7 @@ class OSCQueryClient(object):
         ip_str = ".".join([str(int(num)) for num in self.service_info.addresses[0]])
         return ip_str
 
-    def query_node(self, node: str = "/") -> OSCQueryNode | None:
+    def query_node(self, node: str = "/") -> OSCPathNode | None:
         url = self._get_query_root() + node
         r = None
         try:
@@ -41,7 +41,7 @@ class OSCQueryClient(object):
 
         self.last_json = r.json()
 
-        return OSCQueryNode.from_json(self.last_json)
+        return OSCPathNode.from_json(self.last_json)
 
     def get_host_info(self) -> OSCHostInfo | None:
         url = self._get_query_root() + "/HOST_INFO"

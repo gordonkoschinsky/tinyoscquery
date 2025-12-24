@@ -6,7 +6,7 @@ from ipaddress import IPv4Address, IPv6Address
 from zeroconf import ServiceInfo, Zeroconf
 
 from .shared.host_info import OSCHostInfo
-from .shared.node import OSCQueryNode
+from .shared.osc_path_node import OSCPathNode
 
 
 class OSCQueryService(object):
@@ -32,7 +32,7 @@ class OSCQueryService(object):
         self.osc_port = osc_port
         self.osc_ip = ipaddress.ip_address(osc_ip)
 
-        self.root_node = OSCQueryNode("/", description="root node")
+        self.root_node = OSCPathNode("/", description="root node")
         self.host_info = OSCHostInfo(
             server_name,
             {
@@ -60,7 +60,7 @@ class OSCQueryService(object):
         if hasattr(self, "_zeroconf"):
             self._zeroconf.unregister_all_services()
 
-    def add_node(self, node: OSCQueryNode):
+    def add_node(self, node: OSCPathNode):
         self.root_node.add_child_node(node)
 
     def _start_osc_query_service(self):
