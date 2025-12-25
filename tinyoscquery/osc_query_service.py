@@ -53,7 +53,7 @@ class OSCQueryService:
             "UDP",
         )
 
-        self._zeroconf = Zeroconf()
+        self._zeroconf = Zeroconf(interfaces=[str(self.osc_ip)])
         self._start_osc_query_service()
         self._advertise_osc_service()
         self.http_server = OSCQueryHTTPServer(
@@ -79,8 +79,7 @@ class OSCQueryService:
             0,
             oscqs_desc,
             "%s.oscjson.local." % self.server_name,
-            addresses=["127.0.0.1"],
-            # addresses=[self.osc_ip], # TODO: Understand zeroconf and maybe fix this
+            addresses=[str(self.osc_ip)],
         )
         self._zeroconf.register_service(oscqs_info)
 
