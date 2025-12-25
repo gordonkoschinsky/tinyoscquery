@@ -125,13 +125,10 @@ class OSCQueryHTTPHandler(SimpleHTTPRequestHandler):
         self.wfile.write(bytes(data, "utf-8"))
 
     def do_GET(self) -> None:
-        logger.debug(f"GET {self.path} ({self.client_address})")
+        logger.debug(f"GET {self.path} (from {self.client_address})")
 
         parsed_url = urllib.parse.urlparse(self.path)
         query_params = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
-        logger.debug(f"   {parsed_url.path}")
-        logger.debug(f"   {parsed_url.query}")
-        logger.debug(f"   {query_params}")
 
         for query in query_params:
             logger.debug(f"   {query}")
