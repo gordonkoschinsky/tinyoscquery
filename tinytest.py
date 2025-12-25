@@ -9,7 +9,12 @@ from tinyoscquery.shared.osc_path_node import OSCPathNode
 if __name__ == "__main__":
     osc_namespace = OSCNamespace()
     osc_namespace.add_node(
-        OSCPathNode("/testing/is/cool", value=99, access=OSCAccess.READONLY_VALUE)
+        OSCPathNode(
+            "/testing/is/cool",
+            value=99,
+            access=OSCAccess.READONLY_VALUE,
+            description="Read only int value",
+        )
     )
     osc_namespace.add_node(
         OSCPathNode("/testing/is/good", value=False, access=OSCAccess.READWRITE_VALUE)

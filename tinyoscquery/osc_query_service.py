@@ -1,4 +1,5 @@
 import ipaddress
+import logging
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from ipaddress import IPv4Address, IPv6Address
@@ -7,6 +8,8 @@ from zeroconf import ServiceInfo, Zeroconf
 
 from .shared.host_info import OSCHostInfo
 from .shared.osc_namespace import OSCNamespace
+
+logger = logging.getLogger(__name__)
 
 
 class OSCQueryService:
@@ -114,12 +117,15 @@ class OSCQueryHTTPServer(HTTPServer):
 
 class OSCQueryHTTPHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
+        logger.debug(f"GET {self.path}")
+
         if "HOST_INFO" in self.path:
             self.send_response(200)
             self.send_header("Content-type", "text/json")
             self.end_headers()
             self.wfile.write(bytes(str(self.server.host_info.to_json()), "utf-8"))
             return
+
         node = self.server.root_node.find_subnode(self.path)
         if node is None:
             self.send_response(404)
