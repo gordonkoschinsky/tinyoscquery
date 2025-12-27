@@ -62,7 +62,7 @@ class OSCQueryService:
             ("", self.http_port),
             OSCQueryHTTPHandler,
         )
-        self.http_thread = threading.Thread(target=self._start_http_server)
+        self.http_thread = threading.Thread(target=self._start_http_server, daemon=True)
         self.http_thread.start()
 
     def __del__(self):

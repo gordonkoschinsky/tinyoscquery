@@ -1,5 +1,4 @@
 import logging
-import time
 
 from tinyoscquery.osc_query_service import OSCQueryService
 from tinyoscquery.shared.osc_access import OSCAccess
@@ -46,5 +45,4 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
     logging.debug("Server is up and serving namespace %s", osc_namespace)
 
-    while True:
-        time.sleep(1)
+    input("Press Enter to terminate server...")
