@@ -39,7 +39,9 @@ if __name__ == "__main__":
     oscqs = OSCQueryService(osc_address_space, "Test-Service", 9020, 9020)
 
     logging.getLogger().setLevel(logging.DEBUG)
-    logging.debug("OSCQuery Server is up and serving address space %s", osc_address_space)
+    logging.debug(
+        "OSCQuery Server is up and serving address space %s", osc_address_space
+    )
 
     ip = "127.0.0.1"
     port = 1337
