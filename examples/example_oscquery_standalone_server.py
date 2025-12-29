@@ -5,6 +5,11 @@ from pythonoscquery.shared.osc_access import OSCAccess
 from pythonoscquery.shared.osc_address_space import OSCAddressSpace
 from pythonoscquery.shared.osc_path_node import OSCPathNode
 
+logging.basicConfig()
+logger = logging.getLogger().setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
 if __name__ == "__main__":
     osc_address_space = OSCAddressSpace()
     osc_address_space.add_node(
@@ -49,7 +54,6 @@ if __name__ == "__main__":
 
     oscqs = OSCQueryService(osc_address_space, "Test-Service", 9020, 9020)
 
-    logging.getLogger().setLevel(logging.DEBUG)
-    logging.debug("Server is up and serving address space %s", osc_address_space)
+    logger.debug("Server is up and serving address space %s", osc_address_space)
 
     input("Press Enter to terminate server...")
