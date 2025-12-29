@@ -30,17 +30,18 @@ class OSCCallbackWrapper:
             )
 
         values = list(args)
+        rebuild_args = []
 
         if self.handler.needs_reply_address:
             # the osc client address, when required by the callback, is always the first argument. We don't need to check it.
-            values = values[1:]
+            rebuild_args.append(values.pop(0))
 
         # the osc message address is always the next argument. We don't need to check it.
-        values = values[1:]
+        rebuild_args.append(values.pop(0))
 
         if self.handler.args:
             # fixed parameters, when required by the callback, are always the next argument. We don't need to check them.
-            values = values[1:]
+            rebuild_args.append(values.pop(0))
 
         try:
             values = self.node.validate_values(values)
@@ -48,7 +49,10 @@ class OSCCallbackWrapper:
             logger.error("Type check failed")
             return None
 
-        return self.callback(*args, **kwargs)
+        rebuild_args.extend(values)
+        rebuild_args = tuple(rebuild_args)
+
+        return self.callback(*rebuild_args, **kwargs)
 
     def __repr__(self):
         return f"{self.__class__.__name__}(address: {self.node.full_path} callback={repr(self.callback)})"
