@@ -2,8 +2,8 @@
 
 An OSCQuery library for python.
 
-![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fgordonkoschinsky%2Fpython-oscquery%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
-[![Run tests](https://github.com/gordonkoschinsky/python-oscquery/actions/workflows/python-package.yml/badge.svg)](https://github.com/gordonkoschinsky/python-oscquery/actions/workflows/python-package.yml)
+![Python Version >=3.10](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fgordonkoschinsky%2Fpython-oscquery%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
+![Tests](https://github.com/gordonkoschinsky/python-oscquery/actions/workflows/python-package.yml/badge.svg)
 
 [OSCQuery](https://github.com/Vidvox/OSCQueryProposal) is a protocol that allows
 an [Open Sound Control (OSC)](https://opensoundcontrol.stanford.edu) server to
@@ -27,7 +27,7 @@ ACCESS, VALUE and DESCRIPTION are also implemented. However, lists (or other pyt
 iterables) are not supported as value types.
 
 Completely missing is
-the [websocket communication](https://github.com/Vidvox/OSCQueryProposal?tab=readme-ov-file#optional-bi-directional-communication)
+the [websocket communication](https://github.com/Vidvox/OSCQueryProposal?tab=readme-ov-file#optional-bi-directional-communication).
 So no "listening" is possible.
 
 ### Client / Browser
