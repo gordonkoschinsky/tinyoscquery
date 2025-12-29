@@ -1,8 +1,9 @@
 import logging
-from typing import Any
+from typing import Any, Callable
 
 import pythonosc
 from pythonosc.dispatcher import Dispatcher, Handler
+
 from pythonoscquery.shared.osc_address_space import OSCAddressSpace
 from pythonoscquery.shared.osc_path_node import OSCPathNode
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 class OSCCallbackWrapper:
     """Wrapper class to type-check python-osc callbacks."""
 
-    def __init__(self, node: OSCPathNode, callback: callable):
+    def __init__(self, node: OSCPathNode, callback: Callable):
         self.node = node
         self.callback = callback
         self.handler: pythonosc.dispatcher.Handler | None = None
@@ -28,7 +29,7 @@ class OSCCallbackWrapper:
                 f"{self.__class__.__name__} for {self.node.full_path} has no handler"
             )
 
-        values = args
+        values = list(args)
 
         if self.handler.needs_reply_address:
             # the osc client address, when required by the callback, is always the first argument. We don't need to check it.
@@ -41,7 +42,11 @@ class OSCCallbackWrapper:
             # fixed parameters, when required by the callback, are always the next argument. We don't need to check them.
             values = values[1:]
 
-        self.node.validate_values(values)
+        try:
+            values = self.node.validate_values(values)
+        except TypeError:
+            logger.error("Type check failed")
+            return None
 
         return self.callback(*args, **kwargs)
 
@@ -52,7 +57,7 @@ class OSCCallbackWrapper:
 def map_node(
     node: OSCPathNode,
     dispatcher: Dispatcher,
-    callback: callable,
+    callback: Callable,
     address_space: OSCAddressSpace | None = None,
     *args: Any | list[Any],
     needs_reply_address: bool = False,

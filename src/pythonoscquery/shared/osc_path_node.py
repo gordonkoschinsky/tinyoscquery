@@ -194,19 +194,31 @@ class OSCPathNode:
     def to_json(self, attribute: OSCQueryAttribute | None = None) -> str:
         return json.dumps(self, cls=OSCNodeEncoder, attribute_filter=attribute)
 
-    def validate_values(self, values: list[T]):
+    def validate_values(self, values: list[T]) -> list[T]:
         """Validate the given value types against the specified types of this node.
         Raises TypeError if any of the values are invalid, of if the number of values does
         not match the number of types of this node.
+        Returns sanitized values,
         """
         if len(values) != len(self.type):
             raise TypeError(f"Expected {len(self.type)} value(s), got {len(values)}")
 
-        for i, type_ in enumerate(self.type):
-            if type(values[i]) is not type_:
+        for i, expected_type in enumerate(self.type):
+            received_type = type(values[i])
+            if received_type is not expected_type:
+                if (
+                    expected_type is builtins.bool
+                    and received_type is builtins.int
+                    and values[i] in (0, 1)
+                ):
+                    # Some clients might send int 0 or 1 as substitute for bool
+                    values[i] = bool(values[i])
+                    continue
+
                 raise TypeError(
-                    f"Expected {type_} for value {i}, got {type(values[i])}"
+                    f"Expected {expected_type} for value {i}, got {type(values[i])}"
                 )
+        return values
 
     def are_values_valid(self, values: list[T]) -> bool:
         """Convenience method for validate_values()."""
