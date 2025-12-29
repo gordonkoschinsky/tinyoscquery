@@ -5,7 +5,7 @@ from .shared.osc_host_info import OSCHostInfo
 from .shared.osc_path_node import OSCPathNode
 
 
-class OSCQueryBrowser(object):
+class OSCQueryBrowser:
     def __init__(self) -> None:
         self.listener = OSCQueryListener()
         self.zc = Zeroconf()
@@ -19,7 +19,7 @@ class OSCQueryBrowser(object):
     def get_discovered_oscquery(self):
         return [oscjssvc[1] for oscjssvc in self.listener.oscjson_services.items()]
 
-    def find_service_by_name(self, name):
+    def find_service_by_name(self, name: str):
         for svc in self.get_discovered_oscquery():
             client = OSCQueryClient(svc)
             if name in client.get_host_info().name:
@@ -28,7 +28,7 @@ class OSCQueryBrowser(object):
         return None
 
     def find_nodes_by_endpoint_address(
-        self, address
+        self, address: str
     ) -> list[tuple[ServiceInfo, OSCHostInfo, OSCPathNode]]:
         svcs = []
         for svc in self.get_discovered_oscquery():
