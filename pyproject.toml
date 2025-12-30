@@ -2,9 +2,24 @@
 name = "python-oscquery"
 version = "0.2.0"
 description = "OSCQuery library to advertise an Open Sound Control (OSC) service"
+keywords = ["osc", "sound", "midi", "music", "audio", "lighting", "video", "show control"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: System :: Networking",
+]
 authors = [
     { name = "Cyberkitsune" },
-    { name = "Frank Klein", email = "4243101+gordonkoschinsky@users.noreply.github.com" },
+    { name = "Frank Klein", email = "4243101+fraklein@users.noreply.github.com" },
 ]
 readme = "README.md"
 license = "MIT"
@@ -16,11 +31,18 @@ dependencies = [
     "zeroconf>=0.39.1",
 ]
 
+[project.urls]
+Repository = "https://github.com/fraklein/python-oscquery"
+
+[build-system]
+requires = ["uv_build>=0.9.21,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "pythonoscquery"
+
 [tool.uv]
 package = true
-
-[tool.setuptools.packages.find]
-where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
