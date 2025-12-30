@@ -26,8 +26,8 @@ jobs:
         run: uv build
       # Check that basic features work and we didn't miss to include crucial files
       - name: Smoke test (wheel)
-        run: uv run --isolated --no-project --with dist/*.whl pytest
+        run: uv run --isolated --no-project --with dist/*.whl examples/example_oscquery_client.py
       - name: Smoke test (source distribution)
-        run: uv run --isolated --no-project --with dist/*.tar.gz pytest
+        run: uv run --isolated --no-project --with dist/*.tar.gz examples/example_oscquery_client.py
       #- name: Publish
       #  run: uv publish
