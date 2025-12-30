@@ -58,7 +58,7 @@ class OSCQueryService:
         )
 
         self._zeroconf = Zeroconf(interfaces=[str(self.osc_ip)])
-        self._start_osc_query_service()
+        self._advertise_osc_query_service()
         self._advertise_osc_service()
         self.http_server = OSCQueryHTTPServer(
             self._address_space.root_node,
@@ -73,7 +73,7 @@ class OSCQueryService:
         if hasattr(self, "_zeroconf"):
             self._zeroconf.unregister_all_services()
 
-    def _start_osc_query_service(self):
+    def _advertise_osc_query_service(self):
         oscqs_desc = {"txtvers": 1}
         oscqs_info = ServiceInfo(
             "_oscjson._tcp.local.",
@@ -100,7 +100,7 @@ class OSCQueryService:
             0,
             osc_desc,
             "%s.osc.local." % self.server_name,
-            addresses=["127.0.0.1"],
+            addresses=[str(self.osc_ip)],
         )
 
         self._zeroconf.register_service(osc_info)
