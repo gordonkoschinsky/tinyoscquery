@@ -58,6 +58,14 @@ if __name__ == "__main__":
             description="Read-only string value",
         )
     )
+    osc_address_space.add_node(
+        OSCPathNode(
+            "/other/path",
+            value=[1, 1, 1],
+            access=OSCAccess.READWRITE_VALUE,
+            description="Three ints in a row, in another path",
+        )
+    )
 
     osc_ip = "127.0.0.1"
     oscquery_port = 9020
