@@ -1,17 +1,17 @@
 name: "Publish"
 
 on:
-  
-  push:
-    tags:
-      # Publish on any tag starting with a `v`, e.g., v0.1.0
-      - v*
+  workflow_dispatch:
+  #push:
+  #  tags:
+  #    # Publish on any tag starting with a `v`, e.g., v0.1.0
+  #    - v*
 
 jobs:
   run:
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      name: testpypi
     permissions:
       id-token: write
       contents: read
@@ -29,5 +29,5 @@ jobs:
         run: uv run --isolated --no-project --with dist/*.whl pytest
       - name: Smoke test (source distribution)
         run: uv run --isolated --no-project --with dist/*.tar.gz pytest
-      - name: Publish
-        run: uv publish
+      #- name: Publish
+      #  run: uv publish
