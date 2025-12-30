@@ -49,6 +49,7 @@ class OSCCallbackWrapper:
             logger.error("Type check failed")
             return None
 
+        # Re-create the original args, but with sanitized values
         rebuild_args.extend(values)
         rebuild_args = tuple(rebuild_args)
 

@@ -4,6 +4,7 @@ import logging
 import pytest
 from pythonosc import osc_message_builder
 from pythonosc.dispatcher import Dispatcher
+
 from pythonoscquery.pythonosc_callback_wrapper import OSCCallbackWrapper, map_node
 from pythonoscquery.shared.osc_access import OSCAccess
 from pythonoscquery.shared.osc_address_space import OSCAddressSpace
@@ -96,7 +97,7 @@ class TestCallbackWrapper:
     @pytest.mark.parametrize(
         "address", ["/lalalala", "/test", "/eins/zwo/drei"], indirect=False
     )
-    def test_callback_wrapper_does_not_call_callback_when_called_with_different_address(
+    def test_callback_wrapper_when_called_with_different_address_not_called(
         self, dispatcher, callback, callback_wrapper, osc_path_node
     ):
         map_node(osc_path_node, dispatcher, callback)
@@ -156,17 +157,18 @@ class TestCallbackWrapper:
         [OSCPathNode("/test", value=67, access=OSCAccess.READWRITE_VALUE)],
         indirect=False,
     )
-    def test_raises_when_value_in_message_missing(
-        self, dispatcher, callback, callback_wrapper, address, osc_path_node
+    def test_callback_when_value_in_message_missing_not_called(
+        self, dispatcher, callback, address, osc_path_node
     ):
         map_node(osc_path_node, dispatcher, callback)
 
         for h in dispatcher.handlers_for_address(address):
-            with pytest.raises(TypeError):
-                h.invoke(
-                    ("dummy", 99),
-                    osc_message_builder.OscMessageBuilder(address).build(),
-                )
+            h.invoke(
+                ("dummy", 99),
+                osc_message_builder.OscMessageBuilder(address).build(),
+            )
+
+        callback.assert_not_called()
 
     @pytest.mark.parametrize("address", ["/test"], indirect=False)
     @pytest.mark.parametrize(
@@ -174,7 +176,7 @@ class TestCallbackWrapper:
         [OSCPathNode("/test", value=67, access=OSCAccess.READWRITE_VALUE)],
         indirect=False,
     )
-    def test_raises_when_too_many_value_in_message(
+    def test_callback_when_too_many_value_in_message_not_called(
         self, dispatcher, callback, callback_wrapper, address, osc_path_node
     ):
         map_node(osc_path_node, dispatcher, callback)
@@ -185,11 +187,12 @@ class TestCallbackWrapper:
         message = message_builder.build()
 
         for h in dispatcher.handlers_for_address(address):
-            with pytest.raises(TypeError):
-                h.invoke(
-                    ("dummy", 99),
-                    message,
-                )
+            h.invoke(
+                ("dummy", 99),
+                message,
+            )
+
+        callback.assert_not_called()
 
     @pytest.mark.parametrize("address", ["/test"], indirect=False)
     @pytest.mark.parametrize(
@@ -257,7 +260,7 @@ class TestCallbackWrapper:
         [OSCPathNode("/test", value=67, access=OSCAccess.READWRITE_VALUE)],
         indirect=False,
     )
-    def test_callback_with_wrong_value_type_raises(
+    def test_callback_with_wrong_value_type_not_called(
         self, dispatcher, callback, callback_wrapper, address, osc_path_node
     ):
         map_node(osc_path_node, dispatcher, callback)
@@ -268,8 +271,9 @@ class TestCallbackWrapper:
         message = message_builder.build()
 
         for h in dispatcher.handlers_for_address(address):
-            with pytest.raises(TypeError):
-                h.invoke(("dummy", 99), message)
+            h.invoke(("dummy", 99), message)
+
+        callback.assert_not_called()
 
     def test_node_mapping_adds_to_address_space(
         self, osc_path_node, dispatcher, callback, address_space
@@ -278,3 +282,43 @@ class TestCallbackWrapper:
         map_node(osc_path_node, dispatcher, callback, address_space)
         assert address_space.number_of_nodes == 2
         assert address_space.find_node(osc_path_node.full_path) == osc_path_node
+
+    @pytest.mark.parametrize("address", ["/test"], indirect=False)
+    @pytest.mark.parametrize(
+        "osc_path_node",
+        [
+            OSCPathNode(
+                "/test", value=[True, False, 99], access=OSCAccess.READWRITE_VALUE
+            )
+        ],
+        indirect=False,
+    )
+    def test_boolean_values_substituted_with_ints_considered_valid(
+        self,
+        osc_path_node,
+        dispatcher,
+        callback,
+        callback_wrapper,
+        address_space,
+        address,
+    ):
+        map_node(osc_path_node, dispatcher, callback)
+
+        message_builder = osc_message_builder.OscMessageBuilder(address)
+
+        # Build a message that uses int 0 and 1 as substitutes for True and False
+        for v in [0, 1, 100]:
+            message_builder.add_arg(v)
+        message = message_builder.build()
+
+        for h in dispatcher.handlers_for_address(address):
+            h.invoke(("dummy", 99), message)
+
+        # Check arguments, take floating point errors into account
+        args = callback.call_args.args
+        for called, expected in zip(
+            args, [address, *[False, True, 100]]
+        ):  # the int substitutes should be converted back to boolean values
+            assert called == pytest.approx(expected)
+
+        callback.assert_called_once()
