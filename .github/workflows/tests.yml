@@ -5,10 +5,6 @@ name: Tests
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ['Publish']
-    types: 
-      -requested
 
 jobs:
   build:
