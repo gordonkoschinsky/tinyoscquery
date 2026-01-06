@@ -56,14 +56,64 @@ T = TypeVar("T", bound=int | float | bool | str)
 class OSCPathNode:
     """A node in the OSC address space tree."""
 
+    @classmethod
+    def from_json(cls, json_data: dict[str, Any]) -> "OSCPathNode":
+        """Factory method to create an instance of OSCPathNode from JSON data."""
+        contents = None
+        if "CONTENTS" in json_data:
+            sub_nodes = []
+            for subNode in json_data["CONTENTS"]:
+                sub_nodes.append(OSCPathNode.from_json(json_data["CONTENTS"][subNode]))
+            contents = sub_nodes
+
+        # This *should* be required but some implementations don't have it...
+        full_path = None
+        if "FULL_PATH" in json_data:
+            full_path = json_data["FULL_PATH"]
+
+        description = None
+        if "DESCRIPTION" in json_data:
+            description = json_data["DESCRIPTION"]
+
+        access = None
+        if "ACCESS" in json_data:
+            access = OSCAccess(json_data["ACCESS"])
+
+        value = None
+        if "VALUE" in json_data:
+            value = []
+            if not isinstance(json_data["VALUE"], list):
+                raise TypeError("OSCQuery JSON Value is not List / Array? Out-of-spec?")
+
+            for v in json_data["VALUE"]:
+                value.append(v)
+
+        return cls(
+            full_path=full_path,
+            access=access,
+            description=description,
+            value=value,
+            contents=contents,
+        )
+
     def __init__(
         self,
         full_path: str,
-        contents: list["OSCPathNode"] = None,
         access: OSCAccess = OSCAccess.NO_VALUE,
-        description: str = None,
         value: Union[T, list[T]] = None,
+        description: str = None,
+        contents: list["OSCPathNode"] = None,
     ):
+        """
+        Args:
+            full_path: The OSC address path, e.g. "/test/foo/bar"
+            access: The access mode of the node
+            value: A list of initial values for the node. The argument types are derived from those values
+                If the actual value does not matter, a placeholder with the correct type can be used instead
+            description: A textual description of the node's purpose
+            contents: The child nodes of this node. Don't use this directly, but  add new node via the AddressSpace.
+                This parameter exists for instantiation via json data.
+        """
         if not is_valid_path(full_path):
             raise ValueError(
                 "Invalid path: Path must start with a single trailing forward slash (/)."
@@ -110,40 +160,6 @@ class OSCPathNode:
         self._attributes[OSCQueryAttribute.ACCESS] = access
 
         self._attributes[OSCQueryAttribute.DESCRIPTION] = description
-
-    @classmethod
-    def from_json(cls, json_data: dict[str, Any]) -> "OSCPathNode":
-        """Factory method to create an instance of OSCPathNode from JSON data."""
-        contents = None
-        if "CONTENTS" in json_data:
-            sub_nodes = []
-            for subNode in json_data["CONTENTS"]:
-                sub_nodes.append(OSCPathNode.from_json(json_data["CONTENTS"][subNode]))
-            contents = sub_nodes
-
-        # This *should* be required but some implementations don't have it...
-        full_path = None
-        if "FULL_PATH" in json_data:
-            full_path = json_data["FULL_PATH"]
-
-        description = None
-        if "DESCRIPTION" in json_data:
-            description = json_data["DESCRIPTION"]
-
-        access = None
-        if "ACCESS" in json_data:
-            access = OSCAccess(json_data["ACCESS"])
-
-        value = None
-        if "VALUE" in json_data:
-            value = []
-            if not isinstance(json_data["VALUE"], list):
-                raise TypeError("OSCQuery JSON Value is not List / Array? Out-of-spec?")
-
-            for v in json_data["VALUE"]:
-                value.append(v)
-
-        return cls(full_path, contents, access, description, value)
 
     @property
     def attributes(self) -> dict[OSCQueryAttribute, Any]:

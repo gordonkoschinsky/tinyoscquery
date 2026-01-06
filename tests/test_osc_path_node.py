@@ -98,7 +98,10 @@ class TestOSCPathNode:
         # Arrange
         # Act
         with pytest.raises(ValueError):
-            node = OSCPathNode(path, None, access, None, None)
+            node = OSCPathNode(
+                path,
+                access,
+            )
 
     @pytest.mark.parametrize(
         "path",
@@ -122,7 +125,7 @@ class TestOSCPathNode:
         # Arrange
         # Act
         with pytest.raises(ValueError):
-            node = OSCPathNode(path, None, access, None, 99)
+            node = OSCPathNode(path, access, 99)
 
     @pytest.mark.parametrize(
         "path",
@@ -145,7 +148,7 @@ class TestOSCPathNode:
     def test_node_creation_sets_correct_description(self, path, access):
         # Arrange
         # Act
-        node = OSCPathNode(path, None, access, value=99)
+        node = OSCPathNode(path, access, value=99)
         # Assert
         assert node.access is access
 
