@@ -43,6 +43,8 @@ class OSCQueryService:
         self.http_port = http_port
         self.osc_port = osc_port
         self.osc_ip = ipaddress.ip_address(osc_ip)
+        self.zeroconf = None
+        self.http_server = None
 
         self.host_info = OSCHostInfo(
             server_name,
@@ -58,30 +60,41 @@ class OSCQueryService:
             "UDP",
         )
 
-        zeroconf = Zeroconf(interfaces=[str(self.osc_ip)])
-        self._advertise_osc_query_service(zeroconf)
-        self._advertise_osc_service(zeroconf)
-        http_server = OSCQueryHTTPServer(
-            self._address_space,
-            self.host_info,
-            ("", self.http_port),
-            OSCQueryHTTPHandler,
-        )
-        http_thread = threading.Thread(target=http_server.serve_forever, daemon=True)
-        http_thread.start()
-        logger.info(
-            f"Service started as {self.server_name} on {self.osc_ip}:{self.http_port}"
-        )
-
         def cleanup():
-            logger.debug("Unregistering zeroconf services")
-            zeroconf.unregister_all_services()
-            zeroconf.close()
-
-            logger.debug("Stopping HTTP server")
-            http_server.shutdown()
+            self.stop()
 
         atexit.register(cleanup)
+
+    def start(self):
+        if not self.http_server:
+            self.http_server = OSCQueryHTTPServer(
+                self._address_space,
+                self.host_info,
+                ("", self.http_port),
+                OSCQueryHTTPHandler,
+            )
+            http_thread = threading.Thread(target=self.http_server.serve_forever, daemon=True)
+            http_thread.start()
+            logger.info(
+                f"Service started as {self.server_name} on {self.osc_ip}:{self.http_port}"
+            )
+
+        if not self.zeroconf:
+            self.zeroconf = Zeroconf(interfaces=[str(self.osc_ip)])
+            self._advertise_osc_query_service(self.zeroconf)
+            self._advertise_osc_service(self.zeroconf)
+
+    def stop(self):
+        if self.http_server:
+            logger.debug("Stopping HTTP server")
+            self.http_server.shutdown()
+            self.http_server = None
+
+        if self.zeroconf:
+            logger.debug("Unregistering zeroconf services")
+            self.zeroconf.unregister_all_services()
+            self.zeroconf.close()
+            self.zeroconf = None
 
     def _advertise_osc_query_service(self, zeroconf: Zeroconf):
         oscqs_desc = {"txtvers": 1}
