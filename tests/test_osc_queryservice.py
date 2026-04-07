@@ -41,8 +41,9 @@ def write_only_node():
 class TestOSCQueryService:
     def test_query(self, server, address_space, simple_node, write_only_node):
         """I'm quite sure that this is not a good way to test the server, since it starts the actual server.
-        I don't have the time at thew moment to read up / think about a better way."""
+        I don't have the time at the moment to read up / think about a better way."""
         # Arrange
+        server.start()
         address_space.add_node(simple_node)
         # Act 1
         response = urllib3.request("GET", "http://127.0.0.1:8080/?HOST_INFO")

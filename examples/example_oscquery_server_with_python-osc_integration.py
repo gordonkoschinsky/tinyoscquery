@@ -74,6 +74,7 @@ if __name__ == "__main__":
     oscqs = OSCQueryService(
         osc_address_space, "Test-Service", oscquery_port, osc_port, osc_ip
     )
+    oscqs.start()
 
     logger.debug(
         "OSCQuery Server is up and serving address space %s", osc_address_space

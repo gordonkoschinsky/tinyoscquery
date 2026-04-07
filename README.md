@@ -112,6 +112,7 @@ osc_port = 9021
 oscqs = OSCQueryService(
     osc_address_space, "Test-Service", oscquery_port, osc_port, osc_ip
 )
+oscqs.start()
 
 # The server runs in a daemon thread, so program flow can continue
 print("Server is up and serving address space %s", osc_address_space)
@@ -227,6 +228,7 @@ osc_port = 9021
 
 # Start python-oscquery server
 oscqs = OSCQueryService(osc_address_space, "Test-Service", oscquery_port, osc_port, osc_ip)
+oscqs.start()
 
 print(
     "OSCQuery Server is up and serving address space %s", osc_address_space

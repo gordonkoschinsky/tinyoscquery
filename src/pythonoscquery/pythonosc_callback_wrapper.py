@@ -45,8 +45,8 @@ class OSCCallbackWrapper:
 
         try:
             values = self.node.validate_values(values)
-        except TypeError:
-            logger.error("Type check failed")
+        except TypeError as e:
+            logger.error(f"Type check failed, {str(e)}")
             return None
 
         # Re-create the original args, but with sanitized values

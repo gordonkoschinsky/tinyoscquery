@@ -70,14 +70,16 @@ class OSCAddressSpace:
 
             if child_path == node.full_path:
                 # All nodes up to the destination have been created, the last node is the actual node that is to be added
-                child = node
+                with self.lock:
+                    current_node.add_child(node)
+                break
             else:
                 child = self.find_node(child_path)
-            if not child:
-                child = OSCPathNode(child_path)
+                if not child:
+                    child = OSCPathNode(child_path)
 
-            with self.lock:
-                current_node.add_child(child)
+                    with self.lock:
+                        current_node.add_child(child)
 
             current_node = child
 
