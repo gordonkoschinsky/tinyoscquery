@@ -1,4 +1,5 @@
 import pytest
+
 from pythonoscquery.shared.osc_address_space import OSCAddressSpace
 from pythonoscquery.shared.osc_path_node import OSCPathNode
 
@@ -93,3 +94,14 @@ class TestOSCAddressSpace:
         address_space.add_node(OSCPathNode(path))
         # Assert
         assert address_space.number_of_nodes == number_of_children_before_adding
+
+    def test_address_space_nodes_on_path_are_not_created_multiple_times(
+        self, address_space
+    ):
+        # Arrange / Act
+        node = OSCPathNode("/foo/bar")
+        address_space.add_node(node)
+        node = OSCPathNode("/foo/baz")
+        address_space.add_node(node)
+        # Assert
+        assert address_space.number_of_nodes == 4
