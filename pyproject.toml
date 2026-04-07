@@ -1,6 +1,6 @@
 [project]
 name = "python-oscquery"
-version = "0.3.0"
+version = "0.4.0"
 description = "OSCQuery library to advertise an Open Sound Control (OSC) service"
 keywords = ["osc", "sound", "midi", "music", "audio", "lighting", "video", "show control"]
 classifiers = [
