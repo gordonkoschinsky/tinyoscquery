@@ -26,6 +26,7 @@ if __name__ == "__main__":
     oscqs = OSCQueryService(
         osc_address_space, "Test-Service", 9020, 9020, osc_ip="127.1.1.1"
     )
+    oscqs.start()
 
     time.sleep(1)  # Wait for server being up
 
